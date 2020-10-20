@@ -17,7 +17,6 @@ async function fetchBasket() {
 };
 
 async function createFromData() {
-
     const itemsRef = await itemsToAdd();
     itemsRef.forEach(el => {
         container.innerHTML += `<div>${el.title}</div>
@@ -39,10 +38,9 @@ async function add(id, title) {
     const basketRef = await fetchBasket();
     let idFilter = basketRef.filter(index => index.id === id)
 
-    if (idFilter) {
+    if (qty > 1) {
         qty++
     }
-
     const url = 'http://localhost:1600/basket/post';
     fetch(url, {
         method: "POST",
@@ -58,6 +56,12 @@ async function add(id, title) {
 async function deleteBtn(btn) {
     const id = btn.dataset.id
     const url = `http://localhost:1600/basket/get/${id}`;
-    fetch(url, { method: 'DELETE' })
+    fetch(url, {
+        method: 'PUT',
+        body: JSON.stringify({
+            qty: 2
+        })
+    })
         .then(res => res.json())
+        .then(data => console.log(data))
 };

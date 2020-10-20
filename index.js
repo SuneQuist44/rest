@@ -43,6 +43,14 @@ app.delete('/basket/get/:id', (req, res) => {
         .catch(err => console.log('Error: ', err))
 })
 
+app.put('/basket/get/:id', (req, res) => {
+    const id = req.params.id;
+    const qty = { qty: req.body.qty }
+    Basket.findOneAndUpdate(qty, { qty: req.body.qty })
+        .then(result => res.json({ redirect: '/' }))
+        .catch(err => console.log('Error: ', err))
+})
+
 const port = process.env.PORT || 1600;
 app.listen(port, () => console.log(`Port live on ${port}`))
 
