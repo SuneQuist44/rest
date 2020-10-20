@@ -1,44 +1,46 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
+const cors = require('cors');
+const mongoose = require('mongoose');
+// Mongoose basket
+const Basket = require('./modal')
 
 app.use(express.json())
 app.use(cors())
 
-const users = [
-    { id: 1, name: 'Jimmy' },
-    { id: 2, name: 'Sune' },
-    { id: 3, name: 'Lukas' }
-]
+// Connect to MongoDB
+const mongoURL = 'mongodb+srv://sune:passwordidk@cluster0.voqv4.mongodb.net/user?retryWrites=true&w=majority';
+mongoose.connect(mongoURL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+    .then(result => console.log('Connected to MongoDB'))
+    .catch(err => console.log('Error: ', err))
 
-app.get('/users', (req, res) => {
-    res.send(users)
+
+app.post('/basket/post', (req, res) => {
+    const basket = new Basket({
+        item: req.body.itemId,
+        id: req.body.id,
+        qty: req.body.qty,
+    })
+
+    basket.save()
+        .then(result => console.log(result, ' was succefully added to the basket'))
+        .catch(err => console.log('Error: ', err))
 })
 
-app.get('/users/:id', (req, res) => {
-    const user = users.find(c => c.id === parseInt(req.params.id));
-    !user ? res.status(404).send('The user does not exist') : res.send(user);
+app.get('/basket/get', (req, res) => {
+    Basket.find()
+        .then(result => res.send(result))
+        .catch(err => console.log('Error: ', err))
 })
 
-app.delete('/users/:id', (req, res) => {
-    const user = users.find(c => c.id === parseInt(req.params.id));
-    !user ? res.status(404).send('The user does not exist') : res.send(user);
-
-    const index = users.indexOf(user);
-    users.splice(index, 1);
-
-    res.send(user)
-})
-
-app.post('/users', (req, res) => {
-    const user = {
-        id: users.length + 1,
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone
-    }
-    users.push(user)
-    res.send(user)
+app.delete('/basket/get/:id', (req, res) => {
+    const id = req.params.id;
+    Basket.findByIdAndDelete(id)
+        .then(result => res.json({ redirect: '/' }))
+        .catch(err => console.log('Error: ', err))
 })
 
 const port = process.env.PORT || 1600;
